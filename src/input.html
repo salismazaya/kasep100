@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Input Q & A</title>
+    <link rel="stylesheet" href="css/style/input.css">
+    <script defer src="assets/js/alpine.min.js"></script>
+</head>
+<body>
+
+    <main class="container" x-data="data">
+        <div class="content">
+            <a href="/index.html" class="navigate">
+                <span class="icon-back">
+                    <svg data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"></path>
+                    </svg>
+                </span>
+                <div class="text-back">Back to Home</div>
+            </a>
+
+            <section class="form-input">
+                <form>
+                    <div class="wrap-input">
+                        <div class="input-question">
+                            <label for="inputQuestion">Q:</label>
+                            <input type="text" name="" id="inputQuestion" class="question" placeholder="Pertanyaan" x-model="question">
+                        </div>
+                        <div class="input-answer">
+                            <div class="left">
+                                <label for="inputAnswer">A:</label>
+                            </div>
+                            <div class="right">
+                                <template x-for="i in answers.length">
+                                    <input type="text" name="" id="inputAnswer" class="answer" x-model="answers[i-1]" x-bind:placeholder="i">
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                <button class="btn-add" x-on:click="add_answer">
+                    <span class="icon-add border-gradient">
+                        <svg data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"></path>
+                        </svg>
+                    </span>
+                    <span class="text-add">Add Answer</span>
+                </button>
+            </section>
+
+            <section class="save">
+                <button class="border-gradient" x-on:click="save">Save & Continue</button>
+            </section>
+        </div>
+    </main>
+    
+
+    <script>
+        const { message } = window.__TAURI__.dialog;
+
+        function data() {
+            return {
+                question: null,
+                answers: [],
+                init() {
+                    let question_answers = localStorage.getItem('data');
+                    if (question_answers !== null) {
+                        question_answers = JSON.parse(question_answers);
+                        this.question = question_answers.question;
+                        for (const answer of question_answers.answers) {
+                            this.answers.push(`${answer.answer} : ${answer.score}`);
+                        }
+                    }
+                },
+                add_answer() {
+                    this.answers.push(null);
+                },
+                async save() {
+                    if (!this.question) {
+                        await message('Pertanyaan tidak boleh kosong', { title: 'Kasep', kind: 'error' });
+                        return;
+                    }
+                    
+                    if (this.answers.length === 0) {
+                        await message('Jawaban tidak boleh kosong', { title: 'Kasep', kind: 'error' });
+                        return;
+                    }
+
+                    const data = {
+                        question: this.question,
+                        answers: []
+                    }
+
+                    for (const answer of this.answers) {
+                        console.log(answer);
+                        if (answer === null || answer === "") {
+                            continue;
+                        }
+
+                        if (!answer.includes(':')) {
+                            await message('Salah satu jawaban tidak valid', { title: 'Kasep', kind: 'error' });
+                            return;
+                        }
+                        
+                        const [expected_answer, score] = answer.split(':', 2);
+                        data.answers.push({
+                            answer: expected_answer.trim(),
+                            score: parseInt(score.trim())
+                        })
+
+                    }
+
+                    localStorage.setItem('data', JSON.stringify(data));
+                    await message('Data berhasil disimpan', { title: 'Kasep', kind: 'success' });
+                }
+            }
+        }
+    </script>
+</body>
+</html>

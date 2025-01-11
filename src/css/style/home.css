@@ -1,0 +1,93 @@
+@import "../global.css";
+
+
+.content {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: min(95%, 53.125rem);
+    height: 100vh;
+    color: var(--white);
+}
+
+.content .logo {
+    width: 400px;
+    margin: 80px auto 20px;
+}
+
+.content .wrap-action {
+    margin: 50px auto;
+}
+.wrap-action .btn-action_play {
+    position: relative;
+    width: 300px;
+    height: 80px;
+    margin: 0 auto;
+    border-radius: 24px;
+}
+.btn-action_play:hover {
+    transition: 0.1s ease-in-out;
+    transform: scale(1.2);
+}
+
+.btn-action_play .action_play {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    right: 0;
+    bottom: 0;
+    transform: translateX(-50%) translateY(7%);
+    width: 290px;
+    height: 70px;
+    line-height: 70px;
+    border-radius: inherit;
+    background-color: var(--blue);
+    font-size: var(--font-size-l);
+    letter-spacing: 2px;
+}
+
+.btn-action_setting {
+    display: flex;
+    width: 100%;
+    height: auto;
+    margin: 58px auto;
+}
+
+.action_setting {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    margin: 0 auto;
+    border-radius: 24px;
+}
+.btn-action_setting .icon-setting {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    right: 0;
+    bottom: 0;
+    transform: translateX(-50%) translateY(15%);
+    width: 30px;
+    height: 30px;
+    line-height: 50px;
+    border-radius: inherit;
+    background-color: var(--blue);
+    background: transparent;
+}
+
+.icon-size {
+    width: 40px;
+    height: 40px;
+}
+.icon-size:hover {
+    transform: scale(1.4);
+}
+.icon-resize {
+    width: 40px;
+    height: 40px;
+}
+.icon-resize:hover {
+    transform: scale(1.4);
+}
