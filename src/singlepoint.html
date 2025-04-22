@@ -72,7 +72,7 @@
             <div class="wrap-wrong">
                 <div class="wrong-tim-a">
                     <template x-for="i in failed_count">
-                        <div class="wrong one">
+                        <div class="wrong one" x-on:click="failed_count--">
                             <img src="/assets/x.svg" alt="">
                         </div>
                     </template>
@@ -115,7 +115,7 @@
                     this.answers = question_answers.answers;
 
                     document.addEventListener('keyup', ({ key }) => {
-                        if (key === 'x') {
+                        if (key.toLowerCase() === 'x') {
                             if (this.failed_count < 3) {
                                 this.failed_count++;
                                 const audio = new Audio('assets/audio/wrong.mp3');
@@ -123,11 +123,15 @@
                             }
                         }
 
-                        const tap = parseInt(key);
-                        if (!isNaN(tap) && !this.answereds.includes(tap)) {
-                            this.answereds.push(tap);
+                        if (key.toLowerCase() === 'r') {
+                            this.failed_count = 0;
+                        }
+
+                        const selectedNum = parseInt(key);
+                        if (!isNaN(selectedNum) && !this.answereds.includes(selectedNum)) {
+                            this.answereds.push(selectedNum);
                             
-                            this.point += this.answers[tap-1].score;
+                            this.point += this.answers[selectedNum-1].score;
 
                             const audio = new Audio('assets/audio/success.mp3');
                             audio.play();

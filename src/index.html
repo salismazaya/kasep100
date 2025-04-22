@@ -14,7 +14,7 @@
   <main class="container" x-data="data">
     <div class="content">
       <div class="logo">
-        <img src="/assets/img/logo.jpeg" alt="" srcset="">
+        <img src="/assets/img/logo.png" alt="" srcset="">
       </div>
 
       <section class="wrap-action" x-data="data">
@@ -64,8 +64,6 @@
           const getCurrentWindow  = await window.__TAURI__.window.getCurrentWindow;
           await getCurrentWindow().setFullscreen(status);
           this.is_fullscreen = status;
-          // const audio = new Audio('assets/audio/bg.mp3')
-          // audio.play();
         }
       }
     }
