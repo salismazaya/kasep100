@@ -114,7 +114,7 @@
                     this.question = question_answers.question;
                     this.answers = question_answers.answers;
 
-                    document.addEventListener('keyup', ({ key }) => {
+                    const handleKey = (key) => {
                         if (key.toLowerCase() === 'x') {
                             if (this.failed_count < 3) {
                                 this.failed_count++;
@@ -136,7 +136,20 @@
                             const audio = new Audio('assets/audio/success.mp3');
                             audio.play();
                         }
+                    };
+
+                    document.addEventListener('keyup', ({ key }) => {
+                        handleKey(key);
                     });
+
+                    // Listen to Tauri events from the remote
+                    try {
+                        window.__TAURI__.event.listen('remote-action', (event) => {
+                            handleKey(event.payload);
+                        });
+                    } catch(e) {
+                        console.error('Remote listen error', e);
+                    }
                 },
             }
         }

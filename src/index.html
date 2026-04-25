@@ -49,6 +49,14 @@
           </span>
         </button>
       </section>
+      
+      <div style="margin-top: 30px; text-align: center; color: white;">
+          <div>Buka di HP untuk Remote:</div>
+          <div style="font-size: 24px; font-weight: bold; margin-top: 10px; padding: 10px; background: rgba(255,255,255,0.1); border-radius: 8px;">
+              http://<span x-text="remote_ip"></span>:8080
+          </div>
+      </div>
+
     </div>
   </main>
 
@@ -56,9 +64,16 @@
     function data() {
       return {
         is_fullscreen: false,
+        remote_ip: 'Memuat...',
         async init() {
           const getCurrentWindow  = await window.__TAURI__.window.getCurrentWindow;
           this.is_fullscreen = await getCurrentWindow().isFullscreen();
+          
+          try {
+              this.remote_ip = await window.__TAURI__.core.invoke('get_local_ip');
+          } catch(e) {
+              console.error(e);
+          }
         },
         async fullscreen(status) {
           const getCurrentWindow  = await window.__TAURI__.window.getCurrentWindow;
