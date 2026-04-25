@@ -26,6 +26,8 @@
 
     <main class="container" x-data="data">
         <div class="content">
+            <div style="background: rgba(0,0,0,0.5); padding: 20px; text-align: center; color: #fff; font-size: 32px; font-weight: bold; border-radius: 10px; margin-bottom: 20px; border: 2px solid #5a5a5a;" x-text="question" x-show="question"></div>
+            
             <div class="wrap-points">
                 <div class="main-point">
                     <div class="gradient-border-point-main border-gradient">
@@ -113,6 +115,12 @@
                     question_answers = JSON.parse(question_answers);
                     this.question = question_answers.question;
                     this.answers = question_answers.answers;
+
+                    try {
+                        window.__TAURI__.core.invoke("update_remote_state", { newState: question_answers });
+                    } catch(e) {
+                        console.error('Failed to sync state', e);
+                    }
 
                     const handleKey = (key) => {
                         if (key.toLowerCase() === 'x') {

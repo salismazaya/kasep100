@@ -6,28 +6,31 @@
     <title>Kasep 100 Remote</title>
     <style>
         body { font-family: sans-serif; background: #0f172a; color: white; display: flex; flex-direction: column; align-items: center; padding: 20px; margin: 0; min-height: 100vh; }
-        .title { margin-bottom: 20px; font-size: 28px; font-weight: bold; background: linear-gradient(to right, #3b82f6, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; width: 100%; max-width: 400px; }
-        button { padding: 18px; font-size: 20px; font-weight: bold; cursor: pointer; border: none; border-radius: 12px; background: #1e293b; color: white; transition: 0.1s; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
-        button:active { background: #334155; transform: scale(0.95); }
-        .wrong { background: #ef4444; grid-column: span 2; }
+        .title { margin-bottom: 20px; font-size: 28px; font-weight: bold; background: linear-gradient(to right, #3b82f6, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-align: center; }
+        .question { width: 100%; max-width: 400px; background: rgba(255,255,255,0.1); padding: 15px; border-radius: 12px; margin-bottom: 20px; font-size: 18px; font-weight: bold; text-align: center; border: 1px solid rgba(255,255,255,0.2); }
+        .grid { display: grid; grid-template-columns: 1fr; gap: 12px; width: 100%; max-width: 400px; }
+        button { padding: 18px; font-size: 18px; font-weight: bold; cursor: pointer; border: none; border-radius: 12px; background: #1e293b; color: white; transition: 0.1s; box-shadow: 0 4px 6px rgba(0,0,0,0.3); display: flex; justify-content: space-between; align-items: center; }
+        button:active { background: #334155; transform: scale(0.98); }
+        .score { background: #3b82f6; padding: 4px 10px; border-radius: 8px; font-size: 16px; font-weight: 900; }
+        .wrong { background: #ef4444; justify-content: center; margin-top: 20px; }
         .wrong:active { background: #dc2626; }
-        .reset { background: #f59e0b; grid-column: span 2; }
+        .reset { background: #f59e0b; justify-content: center; }
         .reset:active { background: #d97706; }
     </style>
 </head>
 <body>
     <div class="title">Game Remote</div>
+    <div id="question" class="question">Memuat pertanyaan...</div>
     <div class="grid" id="container">
         <!-- Buttons injected by JS -->
     </div>
 
     <script>
         const container = document.getElementById('container');
+        const questionDiv = document.getElementById('question');
         
         async function sendAction(key) {
             try {
-                // Flash animation for feedback
                 if(navigator.vibrate) navigator.vibrate(50);
                 await fetch('/action', {
                     method: 'POST',
@@ -39,27 +42,60 @@
             }
         }
 
-        // Create buttons 1-8 (usually family 100 has max 8 answers, we'll give 8 or 10)
-        for (let i = 1; i <= 8; i++) {
-            const btn = document.createElement('button');
-            btn.innerText = `Buka ${i}`;
-            btn.onclick = () => sendAction(i.toString());
-            container.appendChild(btn);
+        async function loadState() {
+            try {
+                const res = await fetch('/state');
+                const data = await res.json();
+                
+                questionDiv.innerText = data.question || "Belum ada pertanyaan aktif";
+                container.innerHTML = ''; // Clear existing
+                
+                if (data.answers && data.answers.length > 0) {
+                    data.answers.forEach((ans, index) => {
+                        const btn = document.createElement('button');
+                        btn.onclick = () => sendAction((index + 1).toString());
+                        
+                        const textSpan = document.createElement('span');
+                        textSpan.innerText = `${index + 1}. ${ans.answer}`;
+                        
+                        const scoreSpan = document.createElement('span');
+                        scoreSpan.className = 'score';
+                        scoreSpan.innerText = ans.score;
+                        
+                        btn.appendChild(textSpan);
+                        btn.appendChild(scoreSpan);
+                        container.appendChild(btn);
+                    });
+                } else {
+                    container.innerHTML = '<div style="text-align: center; color: #94a3b8;">Tidak ada data jawaban</div>';
+                }
+                
+                // Wrong button
+                const btnWrong = document.createElement('button');
+                btnWrong.innerText = 'TETOT (Satu Salah)';
+                btnWrong.className = 'wrong';
+                btnWrong.onclick = () => sendAction('x');
+                container.appendChild(btnWrong);
+
+                // Reset salah
+                const btnReset = document.createElement('button');
+                btnReset.innerText = 'Reset Salah';
+                btnReset.className = 'reset';
+                btnReset.onclick = () => sendAction('r');
+                container.appendChild(btnReset);
+                
+            } catch (e) {
+                console.error(e);
+                questionDiv.innerText = "Gagal memuat state. Pastikan server nyala.";
+            }
         }
 
-        // Wrong button
-        const btnWrong = document.createElement('button');
-        btnWrong.innerText = 'TETOT (Satu Salah)';
-        btnWrong.className = 'wrong';
-        btnWrong.onclick = () => sendAction('x');
-        container.appendChild(btnWrong);
-
-        // Reset wrong count
-        const btnReset = document.createElement('button');
-        btnReset.innerText = 'Reset Salah';
-        btnReset.className = 'reset';
-        btnReset.onclick = () => sendAction('r');
-        container.appendChild(btnReset);
+        // Load initially
+        loadState();
+        
+        // Polling to keep it updated when host moves to next question
+        setInterval(loadState, 2000);
+        
     </script>
 </body>
 </html>
